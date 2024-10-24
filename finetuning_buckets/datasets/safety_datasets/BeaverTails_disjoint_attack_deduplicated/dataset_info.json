@@ -1,0 +1,78 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "prompt": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "response": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "category": {
+      "animal_abuse": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "child_abuse": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "controversial_topics,politics": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "discrimination,stereotype,injustice": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "drug_abuse,weapons,banned_substance": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "financial_crime,property_crime,theft": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "hate_speech,offensive_language": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "misinformation_regarding_ethics,laws_and_safety": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "non_violent_unethical_behavior": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "privacy_violation": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "self_harm": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "sexually_explicit,adult_content": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "terrorism,organized_crime": {
+        "dtype": "bool",
+        "_type": "Value"
+      },
+      "violence,aiding_and_abetting,incitement": {
+        "dtype": "bool",
+        "_type": "Value"
+      }
+    },
+    "is_safe": {
+      "dtype": "bool",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}

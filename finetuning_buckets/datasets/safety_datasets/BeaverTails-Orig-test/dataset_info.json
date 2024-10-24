@@ -1,0 +1,86 @@
+{
+  "builder_name": "json",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "beaver_tails",
+  "dataset_size": 155311065,
+  "description": "",
+  "download_checksums": {
+    "/home/representation-noising/BeaverTails/round0/330k/train.jsonl.xz": {
+      "num_bytes": 31061396,
+      "checksum": null
+    },
+    "/home/representation-noising/BeaverTails/round0/330k/test.jsonl.xz": {
+      "num_bytes": 2436728,
+      "checksum": null
+    },
+    "/home/representation-noising/BeaverTails/round0/30k/train.jsonl.gz": {
+      "num_bytes": 4948694,
+      "checksum": null
+    },
+    "/home/representation-noising/BeaverTails/round0/30k/test.jsonl.gz": {
+      "num_bytes": 545222,
+      "checksum": null
+    }
+  },
+  "download_size": 38992040,
+  "features": {
+    "input_ids": {
+      "feature": {
+        "dtype": "int32",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "attention_mask": {
+      "feature": {
+        "dtype": "int8",
+        "_type": "Value"
+      },
+      "_type": "Sequence"
+    },
+    "categories": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "valid_prompt": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 194303105,
+  "splits": {
+    "330k_train": {
+      "name": "330k_train",
+      "num_bytes": 128065232,
+      "num_examples": 300567,
+      "dataset_name": "beaver_tails"
+    },
+    "330k_test": {
+      "name": "330k_test",
+      "num_bytes": 14165551,
+      "num_examples": 33396,
+      "dataset_name": "beaver_tails"
+    },
+    "30k_train": {
+      "name": "30k_train",
+      "num_bytes": 11787489,
+      "num_examples": 27186,
+      "dataset_name": "beaver_tails"
+    },
+    "30k_test": {
+      "name": "30k_test",
+      "num_bytes": 1292793,
+      "num_examples": 3021,
+      "dataset_name": "beaver_tails"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

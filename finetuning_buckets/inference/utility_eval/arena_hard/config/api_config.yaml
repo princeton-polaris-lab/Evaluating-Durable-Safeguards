@@ -1,0 +1,47 @@
+# name: str
+#     model_name: str
+#     endpoints: default to null
+#         - api_base: str
+#           api_key: str
+#           api_version: str optional (only for azure)
+#     api_type: str
+#     tokenizer: str optional (to optimize token limits)
+#     parallel: int
+
+gpt-3.5-turbo-0125:
+    model_name: gpt-3.5-turbo-0125
+    endpoints: null
+    api_type: openai
+    parallel: 8
+
+gpt-4-0314:
+    model_name: gpt-4-0314
+    endpoints: null
+    api_type: openai
+    parallel: 8
+
+gpt-4-1106-preview:
+    model_name: gpt-4-1106-preview
+    endpoints:
+        - api_base: "https://pliopenaieu2.openai.azure.com/"
+          api_key: 
+    api_type: azure
+    parallel: 8
+
+gpt-4-turbo-2024-04-09:
+    model_name: gpt-4-turbo-2024-04-09
+    endpoints:
+        - api_base: "https://pliopenaisc.openai.azure.com/"
+          api_key: 
+          api_version: "2024-04-01-preview"
+    api_type: azure
+    parallel: 32
+
+
+gpt-4o-2024-05-13:
+    model_name: gpt-4o-2024-05-13
+    endpoints:
+        - api_base: "https://pliopenaieu2.openai.azure.com/"
+          api_key: 
+    api_type: azure
+    parallel: 8

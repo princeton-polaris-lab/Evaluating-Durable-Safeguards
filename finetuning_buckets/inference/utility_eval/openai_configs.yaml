@@ -1,0 +1,7 @@
+default:
+    - client_class: "openai.AzureOpenAI" # doesn't use the `openai.OpenAI` client class
+      # the following are passed to the `AzureOpenAI` client class
+      azure_deployment: "gpt-4-turbo-2024-04-09" # name of the latest GPT-4 turbo on azure change as needed
+      api_key: "301b0daf4a9d4db79f2dd7fdedd62c72"
+      azure_endpoint: "https://pliopenaieu2.openai.azure.com/"
+      api_version: "2024-04-01-preview"
