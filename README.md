@@ -27,10 +27,10 @@ The main entry is ``eval_utility_vllm.py``, simply use ``scripts/launch_utility_
 
 ### Case Studies
 #### Run red-teaming evaluation for RepNoise
-We have provided three scripts for fine-tuning and safety evaluation. Run ``scripts/repnoise/launch_ft_safety_eval_orig_dataset.slurm`` for original Beavertails (Used by Rosati et al.) fine-tuning evaluation; Run ``scripts/repnoise/launch_ft_safety_eval_aoa.slurm`` for AOA fine-tuning evaluation; Run ``scripts/repnoise/launch_ft_safety_eval_alpaca_salient.slurm`` for Alpaca-Salient fine-tuning evaluation. 
+We have provided three scripts for fine-tuning and safety evaluation. Run ``scripts/repnoise/launch_ft_safety_eval_orig_dataset.slurm`` for original Beavertails (Used by Rosati et al.) fine-tuning evaluation (Figure 1b); Run ``scripts/repnoise/launch_ft_safety_eval_aoa.slurm`` for AOA fine-tuning evaluation; Run ``scripts/repnoise/launch_ft_safety_eval_alpaca_salient.slurm`` for Alpaca-Salient fine-tuning evaluation (Figure 7). 
 
 #### Run red-teaming evaluation for TAR
-We have provided two scripts for fine-tuning and safety evaluation. Run ``scripts/tar/launch_ft_safety_eval.slurm`` for full-parameter tuning evalaution; Run ``scripts/tar/launch_ft_safety_eval_peft.slurm`` for parameter-efficient fine-tuning (PEFT) evaluation.
+We have provided two scripts for fine-tuning and safety evaluation (Figure 3(b) and Figure 8 right). Run ``scripts/tar/launch_ft_safety_eval.slurm`` for full-parameter tuning evalaution; Run ``scripts/tar/launch_ft_safety_eval_peft.slurm`` for parameter-efficient fine-tuning (PEFT) evaluation.
 
 ## Run Fine-tuning Attack and Save Checkpoints
 The main entry is ``finetune.py``. Important parameters are:
@@ -75,8 +75,14 @@ After having the raw output, the main entry for utility evalution is ``eval_util
 1. ``--model`` specifies the model name used in the raw output file.
 2. ``--bench`` specifies the benchmark need to calculate the score.
 3. ``--save_path`` specifies the path to the raw output file
-4. ````output-path`` specifies the path to save the final score.
+4. ``--output-path`` specifies the path to save the final score.
 
+## Reproduce RepNoise Results Using the Original Codebase
+We have released the original codebase of RepNoie (with some necessary modification detailed in our paper) in https://github.com/boyiwei/RepNoise-Reproduce. We also provieded a [script](https://github.com/boyiwei/RepNoise-Reproduce/blob/main/launch_eval_ft_attack.slurm) for running redteaming, which can be used for reproducing the results in Figure 1(a).
+
+## Reproduce TAR Results Using the Original Codebase
+
+We have released the original codebase of RepNoie (with some necessary modification detailed in our paper) in https://github.com/boyiwei/TAR-Reproduce. We also provided a [sript](https://github.com/boyiwei/TAR-Reproduce/blob/main/red_teaming/orig_implement.slurm) for running redteaming. By changing the ``dataset_name``, ``max_steps``, ``warmup_steps``, you can reproduce the results in Figure 2, Figure 3(a) and Figure 8 left.
 
 ## Citation
 If you think our work helpful, please consider citing us:)
