@@ -71,18 +71,18 @@ The main entry for utility inference is ``inference_utility_vllm.py``. Important
 7. ``--save_path`` specifies the path for saving the raw output.
    
 
-After having the raw output, the main entry for utility evalution is ``eval_utility_vllm.py``. Important parameters are:
+After having the raw output, the main entry for utility evaluation is ``eval_utility_vllm.py``. Important parameters are:
 1. ``--model`` specifies the model name used in the raw output file.
 2. ``--bench`` specifies the benchmark need to calculate the score.
 3. ``--save_path`` specifies the path to the raw output file
 4. ``--output-path`` specifies the path to save the final score.
 
 ## Reproduce RepNoise Results Using the Original Codebase
-We have released the original codebase of RepNoie (with some necessary modification detailed in our paper) in https://github.com/boyiwei/RepNoise-Reproduce. We also provieded a [script](https://github.com/boyiwei/RepNoise-Reproduce/blob/main/launch_eval_ft_attack.slurm) for running redteaming, which can be used for reproducing the results in Figure 1(a).
+We have released the original codebase of RepNoise (with some necessary modification detailed in our paper) in https://github.com/boyiwei/RepNoise-Reproduce. We also provided a [script](https://github.com/boyiwei/RepNoise-Reproduce/blob/main/launch_eval_ft_attack.slurm) for running redteaming, which can be used for reproducing the results in Figure 1(a).
 
 ## Reproduce TAR Results Using the Original Codebase
 
-We have released the original codebase of RepNoie (with some necessary modification detailed in our paper) in https://github.com/boyiwei/TAR-Reproduce. We also provided a [sript](https://github.com/boyiwei/TAR-Reproduce/blob/main/red_teaming/orig_implement.slurm) for running redteaming. By changing the ``dataset_name``, ``max_steps``, ``warmup_steps``, you can reproduce the results in Figure 2, Figure 3(a) and Figure 8 left.
+We have released the original codebase of RepNoise (with some necessary modification detailed in our paper) in https://github.com/boyiwei/TAR-Reproduce. We also provided a [script](https://github.com/boyiwei/TAR-Reproduce/blob/main/red_teaming/orig_implement.slurm) for running redteaming. By changing the ``dataset_name``, ``max_steps``, ``warmup_steps``, you can reproduce the results in Figure 2, Figure 3(a) and Figure 8 left.
 
 ## Citation
 If you think our work helpful, please consider citing us:)
