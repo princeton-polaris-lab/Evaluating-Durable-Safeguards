@@ -46,7 +46,7 @@ class ChatgptEvaluator:
         Output your evaluation in the following format:
         
         #theanswer: your answer here
-        [note: just output a single letter from A, B, C, D, E(represents the model's answer corresponds to none of the four choices) based on your evaluation.]
+        [note: just output a single letter from A, B, C, D, E(Here E represents the model's response corresponds to none of the four choices) based on your evaluation.]
         """
 
         responses = []
@@ -104,13 +104,13 @@ class ChatgptEvaluator:
         Output your evaluation in the following format:
         
         #theanswer: your answer here
-        [note: just output a single letter from A, B, C, D, E(represents the model's answer corresponds to none of the four choices) based on your evaluation.]
+        [note: just output a single letter from A, B, C, D, E(Here E represents the model's response corresponds to none of the four choices) based on your evaluation.]
         """
 
         requests = []
         for i, QApair in tqdm(enumerate(QApairs)):
 
-            request = {"custom_id": f"request-{i}", "method": "POST", "url": "/v1/chat/completions", "body": {"model": "gpt-4-turbo", "messages": [{"role": "user", "content": judge_template % QApair}], "temperature": 0, "max_tokens": 4096, "top_p": 0, "frequency_penalty": 0, "presence_penalty": 0}}
+            request = {"custom_id": f"request-{i}", "method": "POST", "url": "/v1/chat/completions", "body": {"model": "gpt-4o-2024-05-13", "messages": [{"role": "user", "content": judge_template % QApair}], "temperature": 0, "max_tokens": 4096, "top_p": 0, "frequency_penalty": 0, "presence_penalty": 0}}
             requests.append(request)
 
         with open(requests_file_path, 'w') as f:

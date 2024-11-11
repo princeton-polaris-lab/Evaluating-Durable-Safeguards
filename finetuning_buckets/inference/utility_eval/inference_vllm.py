@@ -11,11 +11,12 @@ import os
 import time
 import tiktoken
 
-tiktoken_cache_dir = "cache/tiktoken_cache"
-os.environ["TIKTOKEN_CACHE_DIR"] = tiktoken_cache_dir
+# uncomment for TruthfulQA
+# tiktoken_cache_dir = "cache/tiktoken_cache"
+# os.environ["TIKTOKEN_CACHE_DIR"] = tiktoken_cache_dir
 
-# validate
-assert os.path.exists(os.path.join(tiktoken_cache_dir,"9b5ad71b2ce5302211f9c61530b329a4922fc6a4"))
+# # validate
+# assert os.path.exists(os.path.join(tiktoken_cache_dir,"9b5ad71b2ce5302211f9c61530b329a4922fc6a4"))
 
 
 def inference_in_batch(model, sampling_params, model_family,
@@ -69,8 +70,12 @@ def inference_in_batch(model, sampling_params, model_family,
                 Question = input_texts[i]
                 Answer = output_texts[i]
                 if has_ground_truth:
-                    results.append( {'result' : batch_input_sample[i] + [{'role' : 'assistant', 'content' : output_texts[i]}], 'ground_truth' : batch_ground_truth[i],
+                    if bench in ['mmlu', 'bbh']:
+                        results.append( {'result' : batch_input_sample[i] + [{'role' : 'assistant', 'content' : output_texts[i]}], 'ground_truth' : batch_ground_truth[i], 'subject': meta_info['subjects'][i + batch_id*batch_size],
                                          'prompt' :  Question, 'completion' : Answer } )
+                    else:
+                        results.append( {'result' : batch_input_sample[i] + [{'role' : 'assistant', 'content' : output_texts[i]}], 'ground_truth' : batch_ground_truth[i],
+                                            'prompt' :  Question, 'completion' : Answer } )
                 elif bench == 'mt_bench':
                     if i % 2 == 0:
                         index = int(i / 2)
@@ -120,14 +125,14 @@ def inference_in_batch(model, sampling_params, model_family,
                 else:
                     results.append( { 'result' : batch_input_sample[i] + [{'role' : 'assistant', 'content' : output_texts[i]}] ,
                                             'prompt' :  Question, 'completion' : Answer })
-                
-                # print(f'>>> Example - {i+1}')
+                if i==0:
+                    print(f'>>> Example - {i+1}')
 
-                # print('Q :', Question)
-                # print('\n')
+                    print('Q :', Question)
+                    print('\n')
 
-                # print('A :', Answer )
-                # print('----------------')
+                    print('A :', Answer )
+                    print('----------------')
         batch_id += 1
 
         

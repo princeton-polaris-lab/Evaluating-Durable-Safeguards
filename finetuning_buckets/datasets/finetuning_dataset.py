@@ -82,7 +82,7 @@ def mixed_pile_retain_magpie_align(string_formatter, split='train'):
             selected.append(lst[i+1])
         return selected
             
-    raw_dataset = load_dataset("Magpie-Align/Magpie-Pro-MT-300K-v0.1")["train"]
+    raw_dataset = load_dataset("lapisrocks/magpie-bio-filtered")["train"]
     MAPPING = {"human": "user", "gpt": "assistant"}
     chat = []
     for sample in raw_dataset:
@@ -99,7 +99,7 @@ def mixed_pile_retain_magpie_align(string_formatter, split='train'):
     magpie_dataset = split['train']
     
     # construct pile_retain split
-    dataset = load_dataset("lapisrocks/pile-bio", split=split)
+    pile_retain_dataset = load_dataset("lapisrocks/pile-bio", split='train')
     pile_retain_dataset = pile_retain_dataset.filter(lambda x: x["label"] == False)
     def formatter(example):
         example = example['txt_chunk'].strip('<s>').strip()

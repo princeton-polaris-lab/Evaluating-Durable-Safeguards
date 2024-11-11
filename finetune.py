@@ -94,10 +94,10 @@ datasets.disable_caching()
 SEED = 42
 MAX_SEQ_LEN = 1024
 DTYPE = torch.bfloat16
-LORA_RANK = 128
+LORA_RANK = 16
 LORA_TARGET_MODULES = ["q_proj", "k_proj", "v_proj", "o_proj","gate_proj", "up_proj", "down_proj",]
-LORA_ALPHA = 16
-LORA_DROPOUT = 0
+LORA_ALPHA = 32
+LORA_DROPOUT = 0.05
 
 def disable_dropout(model: torch.nn.Module):
     """Disable dropout in a model."""

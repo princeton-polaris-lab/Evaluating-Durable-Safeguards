@@ -347,6 +347,7 @@ def wmdp_chem(system_prompt = None, input_template = None, output_header = None,
     
     return conversation_data, meta_info
 
+
 @register_dataset
 def wmdp_chem_json(system_prompt = None, input_template = None, output_header = None, split = 'test'):
     
@@ -457,6 +458,40 @@ def wmdp(system_prompt = None, input_template = None, output_header = None, spli
     meta_info = {'has_ground_truth': True} 
     
     return conversation_data, meta_info
+
+
+@register_dataset
+def benign_bio(system_prompt = None, input_template = None, output_header = None, split = 'test'):
+    # dataset = pd.read_csv("finetuning_buckets/datasets/safety_datasets/bio_benign_dataset.csv")
+    dataset = pd.read_csv("finetuning_buckets/datasets/safety_datasets/bio_benign_dataset_diversified.csv")
+    dataset = dataset[:100]
+    conversation_data = []
+    prompt_format = "" 
+    for i in range(len(dataset)):
+        messages = []
+        content = dataset.iloc[i]['question']
+        category = 'bio'
+
+        if system_prompt is not None:
+            messages.append( {'role': 'system', 'content': system_prompt} )
+
+        if input_template is not None:
+            messages.append( {'role': 'user', 'content': input_template % content, 'category': category} )
+        else:
+            messages.append( {'role': 'user', 'content': content, 'category': category} )
+        
+        if output_header is not None:
+            messages.append({'role': 'assistant', 'content': output_header})
+        else:
+            messages.append({'role': 'assistant', 'content': ''})
+        
+        ground_truth = ''
+        conversation_data.append((messages, ground_truth))
+    
+    meta_info = {'has_ground_truth': True}
+    
+    return conversation_data, meta_info 
+
 
 
 @register_dataset

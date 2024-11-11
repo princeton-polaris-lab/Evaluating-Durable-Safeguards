@@ -8,6 +8,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader, Dataset
 import torch
 import re
+from datasets import load_dataset
 import numpy as np
 import os
 
@@ -106,6 +107,59 @@ def wmdp_json_eval(results):
     }
     return metric
     
+    
+def perplexity_score(results):
+    perplexity_list = []
+    log_perplexity_list = []
+    for item in results:
+        perplexity = item[-1]['content']
+        perplexity_list.append(perplexity)
+        log_perplexity_list.append(np.log(perplexity))
+    avg_perplexity = np.mean(perplexity_list)
+    avg_log_perplexity = np.mean(log_perplexity_list)
+            
+    metric = {
+            'evaluator' : 'key_word',
+            'num_tot' : len(results),
+            'asr': avg_log_perplexity,
+        }
+
+    return metric
+
+
+def perplexity_score_gpt2(results):
+    from transformers import GPT2LMHeadModel, GPT2TokenizerFast
+
+    device = "cuda"
+    model_id = "/scratch/gpfs/bw1822/nlp_checkpoints/gpt2-large"
+    model = GPT2LMHeadModel.from_pretrained(model_id).to(device)
+    tokenizer = GPT2TokenizerFast.from_pretrained(model_id)
+    nlls = []
+    print("Running Perplexity Analysis.")
+    for i in tqdm(range(len(results))):
+        output = results[i][-1]['content']
+        encodings = tokenizer(output, return_tensors="pt")
+        max_length = model.config.n_positions
+        seq_len = encodings.input_ids.size(1)
+        max_length = 1024
+        input_ids = encodings.input_ids[:, :max_length].to(device)
+        target_ids = input_ids.clone()
+        with torch.no_grad():
+            outputs = model(input_ids, labels=target_ids)
+
+            # loss is calculated using CrossEntropyLoss which averages over valid labels
+            # N.B. the model only calculates loss over trg_len - 1 labels, because it internally shifts the labels
+            # to the left by 1.
+            neg_log_likelihood = outputs.loss
+            nlls.append(neg_log_likelihood)
+
+    ppl = torch.exp(torch.stack(nlls).mean())
+    metric = {
+        'evaluator' : 'perplexity',
+        'num_tot' : len(results),
+        'asr': ppl,
+    }
+    return metric
 
 def key_word_asr(results):
     
@@ -159,7 +213,8 @@ def chatgpt_asr(questions, results):
 def sorry_bench_fulfillr(raw_dataset, results):
     from vllm import SamplingParams, LLM
 
-    JUDGE_MODEL_PATH = "ckpts/ft-mistral-7b-instruct-v0.2-sorry-bench-202406" # First download the judge model to this path!
+    JUDGE_MODEL_PATH = "/scratch/gpfs/bw1822/nlp_checkpoints/ft-mistral-7b-instruct-v0.2-sorry-bench-202406" # First download the judge model to this path!
+    # JUDGE_MODEL_PATH = "ckpts/ft-mistral-7b-instruct-v0.2-sorry-bench-202406" # First download the judge model to this path!
 
     prompts = []
     responses = []
@@ -317,7 +372,7 @@ def vulnerable_code_eval(questions, answers):
 
 
 def beavertails_eval(results):
-    harmfulness_pipe = pipeline('text-classification', model='domenicrosati/deberta-v3-xsmall-beavertails-harmful-qa-classifier', device='cuda')
+    harmfulness_pipe = pipeline('text-classification', model='/scratch/gpfs/bw1822/nlp_checkpoints/deberta-v3-xsmall-beavertails-harmful-qa-classifier', device='cuda')
     harmful_scores = []
     for i in range(len(results)):
         item = results[i]
@@ -401,14 +456,15 @@ def eval_in_batch(model, sampling_params, model_family, num_prefix_tokens = 0, Q
                     else:
                         results.append( batch_input_sample[i] + [{'role' : 'assistant', 'content' : Answer}] )
                     
-                    print(f'>>> Example - {i+1}')
+                    if i == 0:
+                        print(f'>>> Example - {i+1}')
 
-                    print('Q :', Question)
-                    print('\n')
+                        print('Q :', Question)
+                        print('\n')
 
-                    print('A :', Answer)
-                    print('\n')
-                    print('----------------')
+                        print('A :', Answer)
+                        print('\n')
+                        print('----------------')
 
 
 
@@ -467,6 +523,8 @@ def eval_in_batch(model, sampling_params, model_family, num_prefix_tokens = 0, Q
 
     if evaluator == 'none':
         metric = None    
+    elif evaluator == 'perplexity':
+        metric = perplexity_score_gpt2(results)
     elif evaluator == 'key_word':
         metric = key_word_asr(results)
     elif evaluator == 'sorry-bench-evaluator':

@@ -125,13 +125,23 @@ class Chat:
                 item_processed_turns[i][1]['content'] = item_processed[1]['content']['turns'][i]
                 if i == 0:
                     item_processed_turns[i] = self.string_formatter(item_processed_turns[i])
+                    # markers = ['<|begin_of_text|>'] # TODO(wby) add support to non-llama3 family
+                    # escaped_markers = [re.escape(marker) for marker in markers]
+                    # pattern = '|'.join(escaped_markers)
+                    # item_processed_turns[i] = re.sub(pattern, '', item_processed_turns[i])
                 else:
                     string_formatter = self.get_string_formatter_for_completion(tokenizer, drop_system_prompt=True)
                     item_processed_turns[i] = string_formatter(item_processed_turns[i])
-                
+                    # remove the bos token for the non-first turn dialog
+                    markers = ['<|begin_of_text|>'] # TODO(wby) add support to non-llama3 family
+                    escaped_markers = [re.escape(marker) for marker in markers]
+                    pattern = '|'.join(escaped_markers)
+                    item_processed_turns[i] = re.sub(pattern, '', item_processed_turns[i])
                 item_processed_turns[i] = context + item_processed_turns[i]
                 inputs_processed.append(item_processed_turns[i])
-                output = self.model.generate(item_processed_turns[i], sampling_params)[0]
+                # tokenize
+                item_processed_turns_tokenized = tokenizer(item_processed_turns[i], add_special_tokens=False).input_ids
+                output = self.model.generate(prompt_token_ids=item_processed_turns_tokenized, sampling_params=sampling_params)[0]
                 generated_text = output.outputs[0].text
                 output_texts.append(generated_text.strip())
                 # get the outputs with special tokens, and appended it into the input for the next turn
@@ -147,6 +157,9 @@ class Chat:
         Generate one-shot output for multi-choice tasks. ABCD are the four options for the multiple choice question. The correct answer is the one with the highest logits.
         """
         inputs_processed = []
+        inputs_with_candidates = []
+        candidates = [' A', ' B', ' C', ' D']
+        candidate_ids = []
 
         for item in inputs:
             # print(f"item: {item}")
@@ -160,11 +173,12 @@ class Chat:
             item_processed = self.string_formatter(item_processed)
             if dataset in ['wmdp_bio', 'wmdp_chem', 'wmdp_cyber', 'wmdp', 'mmlu', 'hellaswag']:
                 item_processed = self.remove_template(item_processed) # remove formatter for better format following
+            
+            for candidate in candidates:
+                inputs_with_candidates.append(item_processed + candidate)
                 
             inputs_processed.append(item_processed)
             
-        candidates = [' A', ' B', ' C', ' D', 'A', 'B', 'C', 'D']
-        candidate_ids = []
         
         # get the correcponding token ids
         for candidate in candidates:
@@ -178,21 +192,24 @@ class Chat:
         else:
             sampling_params = self.sampling_params
         # sampling_params.logprobs=self.tokenizer.vocab_size # Need to first initialize LLM with max_logprobs=1000
-        sampling_params.logprobs = 1000
         sampling_params.max_tokens = 1 # We only need to know the first logits distribution
+        sampling_params.prompt_logprobs=1
+        sampling_params.temperature=0
+        sampling_params.detokenize=False
+        sampling_params.top_p=1.0
         
-        
-        outputs = self.model.generate(inputs_processed, sampling_params)
+
+        inputs_with_candidates_tokenized = []
+        for i in range(len(inputs_with_candidates)):
+            inputs_with_candidates_tokenized.append(self.tokenizer(inputs_with_candidates[i], add_special_tokens=False).input_ids)
+        outputs = self.model.generate(prompt_token_ids=inputs_with_candidates_tokenized, sampling_params=sampling_params)
         output_texts = [] # the model output part texts
-        for i in range(len(outputs)):
+        for i in range(int(len(outputs) / 4)):
             candidate_logits = []
-            for label in candidate_ids:
-                try:
-                    candidate_logits.append(outputs[i].outputs[0].logprobs[0][label].logprob)
-                except:
-                # If an option is not in the first 1000, set its logit to -100
-                    print("Warning: {} not found. Artificially adding log prob of -100.".format(label))
-                    candidate_logits.append(-100)
+            for j in range(4):
+                loc = 4 * i + j
+                label = candidate_ids[j]
+                candidate_logits.append(outputs[loc].prompt_logprobs[-1][label].logprob)
             candidate_logits = torch.tensor(candidate_logits).to(torch.float32)
             probs = (
                 torch.nn.functional.softmax(
@@ -203,8 +220,59 @@ class Chat:
                 .cpu()
                 .numpy()
             )
-            answer = {i: k for i, k in enumerate(["A", "B", "C", "D", "A", "B", "C", "D"])}[np.argmax(probs)]
+            answer = {i: k for i, k in enumerate(["A", "B", "C", "D"])}[np.argmax(probs)]
             output_texts.append(answer)
+            
+        return inputs_processed, output_texts
+    
+    def generate_one_shot_in_batch_perplexity(self, inputs, sampling_params_override = None, dataset = None):
+        
+        inputs_processed = []
+        inputs_with_candidates = []
+        candidate_ids = []
+
+        for item in inputs:
+            # print(f"item: {item}")
+            if isinstance(item, dict) or isinstance(item, list):
+                item_processed = self.validate_conversation(item)
+            elif isinstance(item, str):
+                item_processed = self.init_conversation() + [{'role': 'user', 'content': input}, {'role': 'assistant', 'content': ''}]
+            else:
+                raise ValueError(f"input {item} is not a valid conversation input")
+            
+            item_processed = self.string_formatter(item_processed)
+            # if dataset in ['wmdp_bio', 'wmdp_chem', 'wmdp_cyber', 'wmdp', 'mmlu', 'hellaswag']:
+            # item_processed = self.remove_template(item_processed) # remove formatter for better format following
+
+            inputs_processed.append(item_processed)
+            
+        
+        if sampling_params_override is not None:
+            sampling_params = sampling_params_override
+        else:
+            sampling_params = self.sampling_params
+        # sampling_params.logprobs=self.tokenizer.vocab_size # Need to first initialize LLM with max_logprobs=1000
+        sampling_params.max_tokens = 1 # We only need to know the first logits distribution
+        sampling_params.prompt_logprobs=1
+        sampling_params.temperature=0
+        sampling_params.detokenize=False
+        sampling_params.top_p=1.0
+
+        inputs_processed_tokenized = []
+        for i in range(len(inputs_processed)):
+            inputs_processed_tokenized.append(self.tokenizer(inputs_processed[i], add_special_tokens=False).input_ids)
+        outputs = self.model.generate(prompt_token_ids=inputs_processed_tokenized, sampling_params=sampling_params)
+        output_texts = [] # the model output part texts
+        for i in range(int(len(outputs))):
+            # compute the perplexity for each output
+            prompt_logprobs = outputs[i].prompt_logprobs
+            logprob = 0
+            for j in range(int(len(inputs_processed_tokenized[i])-1)):
+                label = inputs_processed_tokenized[i][j+1]
+                logprob += prompt_logprobs[j+1][label].logprob
+            avg_logprob = logprob / (len(prompt_logprobs) - 1) # We don't have logprob for the first input token
+            perplexity = np.exp(-avg_logprob)
+            output_texts.append(perplexity)
             
         return inputs_processed, output_texts
     
@@ -216,6 +284,8 @@ class Chat:
         # elif dataset in ['wmdp', 'mmlu', 'hellaswag', 'wmdp_bio_subset']:
         elif dataset in ['wmdp_bio', 'wmdp_chem', 'wmdp_cyber', 'wmdp', 'mmlu', 'hellaswag', 'wmdp_bio_subset']:
             return self.generate_one_shot_in_batch_multi_choice(inputs, sampling_params_override, dataset)
+        # elif dataset in ['benign_bio']:
+        #     return self.generate_one_shot_in_batch_perplexity(inputs, sampling_params_override, dataset)
         
         inputs_processed = []
 
@@ -229,7 +299,7 @@ class Chat:
                 raise ValueError(f"input {item} is not a valid conversation input")
             
             item_processed = self.string_formatter(item_processed)
-            if dataset in ['bbh', 'gsm8k', 'human_eval', 'beavertails_evaluation_no_chat_template', 'beavertails_orig_evaluation_no_chat_template']:
+            if dataset in ['wmdp_bio', 'wmdp_chem', 'wmdp_cyber','bbh', 'gsm8k', 'human_eval', 'beavertails_evaluation_no_chat_template', 'beavertails_orig_evaluation_no_chat_template', 'wmdp_bio_json', 'benign_bio']:
                 item_processed = self.remove_template(item_processed) # remove formatter for better format following
                 
             inputs_processed.append(item_processed)
@@ -238,8 +308,14 @@ class Chat:
             sampling_params = sampling_params_override
         else:
             sampling_params = self.sampling_params
-        
-        outputs = self.model.generate(inputs_processed, sampling_params)
+            
+        # self.sampling_params.temperature = 0.0
+            
+        inputs_processed_tokenized = []
+        for i in range(len(inputs_processed)):
+            inputs_processed_tokenized.append(self.tokenizer(inputs_processed[i], add_special_tokens=False).input_ids)
+            # inputs_processed_tokenized.append(self.tokenizer(inputs_processed[i]).input_ids) # For TAR-v1 model with chat template
+        outputs = self.model.generate(prompt_token_ids=inputs_processed_tokenized, sampling_params=sampling_params)
         output_texts = [] # the model output part texts
 
         for output in outputs:
@@ -257,8 +333,11 @@ class Chat:
         templates = {
             "llama2": ['[INST] ', ' [/INST]'],
             "llama2_repnoise": ['<s>[INST] ', ' [/INST]'],
-            "llama3": ["<|start_header_id|>user<|end_header_id|>\n\n", "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"],
-                    #    "<|start_header_id|>system<|end_header_id|>", "<|begin_of_text|>", "<|eot_id|>"],
+            "llama3": ["<|start_header_id|>user<|end_header_id|>\n\n", "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
+                       "<|start_header_id|>system<|end_header_id|>", "<|begin_of_text|>", "<|eot_id|>"], # notemp+nobos
+            # "llama3": [""], # chemttemp+bos
+            # "llama3": ["<|begin_of_text|>"], # chattemp + nobos
+            # "llama3": ["<|start_header_id|>user<|end_header_id|>\n\n", "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"], # notemp + bos
             "gemma": ['<bos><start_of_turn>user\n', '<end_of_turn>\n<start_of_turn>model\n'],
             "gemma2": ['<bos><start_of_turn>user\n', '<end_of_turn>\n<start_of_turn>model\n'],
             "mistral": ['[INST] ', ' [/INST]'],
