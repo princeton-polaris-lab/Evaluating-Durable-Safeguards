@@ -1,6 +1,6 @@
 # Adaptive-Finetuning-Attacks
-This repository provides an original implementation of *On Evaluating the Durability of Safeguards
-for Open-Weight LLMs* by Xiangyu Qi*, Boyi Wei*, Nicholas Carlini, Yangsibo Huang, Tinghao Xie, Luxi He, Matthew Jagielski, Milad Nasr, Prateek Mitall, and Peter Henderson. (*Equal contribution)
+This repository provides an original implementation of [*On Evaluating the Durability of Safeguards
+for Open-Weight LLMs*](https://arxiv.org/abs/2412.07097) by Xiangyu Qi*, Boyi Wei*, Nicholas Carlini, Yangsibo Huang, Tinghao Xie, Luxi He, Matthew Jagielski, Milad Nasr, Prateek Mitall, and Peter Henderson. (*Equal contribution)
 
 
 ## Create environment
