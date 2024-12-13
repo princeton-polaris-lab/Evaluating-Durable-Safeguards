@@ -90,4 +90,10 @@ We have released the original codebase of RepNoise (with some necessary modifica
 ## Citation
 If you think our work helpful, please consider citing us:)
 ```
+@article{qi2024evaluating,
+  title={On Evaluating the Durability of Safeguards for Open-Weight LLMs},
+  author={Qi, Xiangyu and Wei, Boyi and Carlini, Nicholas and Huang, Yangsibo and Xie, Tinghao and He, Luxi and Jagielski, Matthew and Nasr, Milad and Mittal, Prateek and Henderson, Peter},
+  journal={arXiv preprint arXiv:2412.07097},
+  year={2024}
+}
 ```
