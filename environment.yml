@@ -1,4 +1,4 @@
-name: adaptive-attack-test
+name: adaptive-attack
 channels:
   - pytorch
   - nvidia
