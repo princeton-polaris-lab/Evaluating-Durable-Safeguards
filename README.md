@@ -19,7 +19,7 @@ The main entry is ``finetune.py``, simply use ``scripts/launch_ft.slurm`` for a 
 The main entry is ``eval_safety_vllm.py``, simply use ``scripts/launch_safety_eval.slurm`` for a demo run, in which you can specify the safety benchmark, the base model, the output file path, and other generation configs.
 
 ### Run utility evaluation on a given checkpoint
-Because some of our utility benchmarks involve GPT-judge and require internet access. Therefore, we separate our inference and evaluation pipeline. 
+Because some of our utility benchmarks involve GPT-judge and require internet access, we separate our inference and evaluation pipeline. 
 #### Run utility inference
 The main entry is ``inference_utility_vllm.py``, simply use ``scipts/launch_utility_inference.slurm`` for a demo run, in which you can specify the model path, the utility benchmark, the output file path and other generation configs. After running inference, it will output a raw output file to the specified path.
 #### Run utility evaluation
