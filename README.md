@@ -5,7 +5,7 @@ for Open-Weight LLMs*](https://arxiv.org/abs/2412.07097) by Xiangyu Qi*, Boyi We
 
 ## Create environment
 
-You can use the following instructions to create a conda environment:
+You can use the following instructions to create the conda environment:
 
 ```shell
 conda env create -f environment.yml
